@@ -31,7 +31,7 @@ jobs:
       working-directory: ./back-Ventas_SpringBoot/Springboot-API-REST
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ventas 
+        ECR_REPOSITORY: examenventas
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -41,7 +41,7 @@ jobs:
       working-directory: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: despacho 
+        ECR_REPOSITORY: examendespachos
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -50,7 +50,7 @@ jobs:
       #se levanta el cluster
     - name: Actualizar Kubeconfig
       run: |
-        aws eks update-kubeconfig --region us-east-1 --name EKS-Ev3
+        aws eks update-kubeconfig --region us-east-1 --name eks-examen
 
     - name: Aplicar manifiestos y actualizar imágenes
       env:
@@ -59,8 +59,8 @@ jobs:
       run: |
         kubectl apply -f k8s/
 
-        kubectl set image deployment/back-ventas-deployment back-ventas=$ECR_REGISTRY/ventas:$TAG
-        kubectl set image deployment/back-despachos-deployment back-despachos=$ECR_REGISTRY/despacho:$TAG
+        kubectl set image deployment/back-ventas-deployment back-ventas=$ECR_REGISTRY/examenventas:$TAG
+        kubectl set image deployment/back-despachos-deployment back-despachos=$ECR_REGISTRY/examendespachos:$TAG
 
         kubectl rollout status deployment/back-ventas-deployment
         kubectl rollout status deployment/back-despachos-deployment
