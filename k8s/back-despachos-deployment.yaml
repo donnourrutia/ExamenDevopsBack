@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: main
+kind: Deployment
 metadata:
-  name: back-despachos-main
+  name: back-despachos-deployment
 spec:
   replicas: 2
   selector:
@@ -63,8 +63,28 @@ metadata:
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: main
-    name: back-despachos-main
+    kind: Deployment
+    name: back-despachos-deployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ventas-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: back-ventas-deployment
   minReplicas: 2
   maxReplicas: 5
   metrics:
