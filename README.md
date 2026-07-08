@@ -1,6 +1,6 @@
 # 🔧 Innovatech Chile - Servicios Backend
 
-Repositorio encargado de la capa de procesamiento de datos de Innovatech Chile. La solución se encuentra dividida en servicios independientes, cada uno con responsabilidades específicas dentro del flujo de ventas y distribución de productos.
+Repositorio encargado de la capa de procesamiento de datos de Innovatech Chile. La solución está basada en una arquitectura de microservicios, donde cada componente ejecuta una función específica dentro del proceso de ventas y distribución de productos.
 
 ## 📌 Componentes del Sistema
 
@@ -14,9 +14,24 @@ Gestiona las actividades logísticas posteriores a la compra, incluyendo la asig
 
 ## ☁️ Infraestructura
 
-Los servicios se ejecutan dentro de un entorno Kubernetes administrado mediante AWS EKS. La comunicación externa se realiza utilizando balanceadores de carga proporcionados por AWS.
+Los servicios se ejecutan sobre un clúster de **Amazon EKS (Elastic Kubernetes Service)**, donde cada microservicio se despliega como un **Deployment** independiente.
 
-Para adaptarse a variaciones en la demanda, se implementó escalamiento automático horizontal (HPA), configurado para aumentar la cantidad de pods cuando el consumo promedio de CPU supera el 50%.
+El acceso externo se realiza mediante **Load Balancers** administrados por AWS, permitiendo distribuir las solicitudes entre las distintas réplicas disponibles de cada servicio.
+
+Las imágenes Docker utilizadas por los microservicios se almacenan en **Amazon ECR**, desde donde Kubernetes obtiene automáticamente la versión correspondiente durante el despliegue.
+
+## 📈 Escalamiento Automático
+
+La plataforma utiliza **Horizontal Pod Autoscaler (HPA)** para ajustar automáticamente la cantidad de Pods de cada microservicio según la carga del sistema.
+
+El HPA supervisa el consumo promedio de CPU y, cuando este supera el **50 %**, incrementa el número de réplicas para mantener el rendimiento de la aplicación. Cuando la demanda disminuye, el escalador reduce automáticamente la cantidad de Pods en ejecución, optimizando el uso de los recursos del clúster.
+
+Esta estrategia proporciona los siguientes beneficios:
+
+- Escalamiento automático según la carga de trabajo.
+- Mayor disponibilidad de los microservicios.
+- Distribución eficiente de las solicitudes entre múltiples Pods.
+- Optimización del consumo de recursos en Kubernetes.
 
 ## 📋 Requisitos para Desarrollo
 
@@ -57,14 +72,15 @@ Cada microservicio debe ejecutarse desde su respectivo proyecto.
 
 ## ⚡ Automatización DevOps
 
-El ciclo de integración y despliegue se encuentra automatizado mediante GitHub Actions.
+El proceso de integración y despliegue continuo se encuentra automatizado mediante **GitHub Actions**, permitiendo publicar nuevas versiones de los microservicios de forma controlada.
 
-### Proceso de publicación
+### Flujo del pipeline
 
 1. Validación y compilación del código fuente.
-2. Generación de los artefactos ejecutables (`.jar`).
-3. Construcción de imágenes Docker para cada servicio.
-4. Publicación de imágenes en Amazon ECR.
-5. Actualización de los recursos desplegados en AWS EKS mediante Kubernetes.
+2. Generación de los archivos ejecutables (`.jar`).
+3. Construcción de imágenes Docker para cada microservicio.
+4. Publicación de las imágenes en Amazon ECR.
+5. Actualización automática de los Deployments en Amazon EKS.
+6. Escalamiento dinámico de los servicios mediante Horizontal Pod Autoscaler.
 
-Las credenciales utilizadas durante el proceso se almacenan mediante GitHub Secrets para evitar la exposición de información sensible dentro del repositorio.
+Las credenciales necesarias para la ejecución del pipeline se administran mediante **GitHub Secrets**, evitando exponer información sensible dentro del repositorio.
